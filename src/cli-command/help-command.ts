@@ -1,7 +1,7 @@
 import { CliCommandInterface } from './cli-command.interface.js';
 
 export class HelpCommand implements CliCommandInterface {
-  public readonly name = '--help';
+  public static readonly command = '--help';
 
   public execute(): void {
     console.log(`
@@ -12,7 +12,7 @@ export class HelpCommand implements CliCommandInterface {
           --version:                   # выводит номер версии
           --help:                      # печатает этот текст
           --import <path>:             # импортирует данные из TSV
-          --generator <n> <path> <url> # генерирует произвольное количество тестовых данных
+          --generate <n> <path> <url> # генерирует произвольное количество тестовых данных
     `);
   }
 }

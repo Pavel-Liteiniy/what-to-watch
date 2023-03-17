@@ -1,36 +1,39 @@
-import { CliCommandInterface } from '../cli-command/cli-command.interface';
+import { CliCommandInterface } from '../cli-command/cli-command.interface.js';
 
 import { VersionCommand } from '../cli-command/version-command.js';
 import { HelpCommand } from '../cli-command/help-command.js';
 import { ImportCommand } from '../cli-command/import-command.js';
+import { GenerateCommand } from '../cli-command/generate-command.js';
 
 interface Commands {
-  '--help': HelpCommand;
-  '--version': VersionCommand;
-  '--import': ImportCommand;
+  [HelpCommand.command]: HelpCommand;
+  [VersionCommand.command]: VersionCommand;
+  [ImportCommand.command]: ImportCommand;
+  [GenerateCommand.command]: GenerateCommand;
 }
 
 interface ParsedCommand {
-  name: keyof Commands | null;
+  command: keyof Commands | null;
   args: string[];
 }
 
 export class CLIApplication {
   private commands: Commands = {
-    '--help': new HelpCommand(),
-    '--version': new VersionCommand(),
-    '--import': new ImportCommand(),
+    [HelpCommand.command]: new HelpCommand(),
+    [VersionCommand.command]: new VersionCommand(),
+    [ImportCommand.command]: new ImportCommand(),
+    [GenerateCommand.command]: new GenerateCommand(),
   };
 
-  private defaultCommand = this.commands['--help'];
+  private defaultCommand = this.commands[HelpCommand.command];
 
   private parseCommand(cliArguments: string[]): ParsedCommand {
-    const parsedCommand: ParsedCommand = { name: null, args: []};
+    const parsedCommand: ParsedCommand = { command: null, args: []};
 
     return cliArguments.reduce((acc, item) => {
       if (item.startsWith('--')) {
-        acc.name = item as keyof Commands;
-      } else if (acc.name && item) {
+        acc.command = item as keyof Commands;
+      } else if (acc.command && item) {
         acc.args.push(item);
       }
 
@@ -47,7 +50,7 @@ export class CLIApplication {
   }
 
   public processCommand(argv: string[]): void {
-    const { name, args } = this.parseCommand(argv);
+    const { command: name, args } = this.parseCommand(argv);
 
     const command = this.getCommand(name);
     command.execute(...args);

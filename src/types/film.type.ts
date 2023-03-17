@@ -1,9 +1,11 @@
+import { Dayjs } from 'dayjs';
+
 import { Genre } from './genre.enum.js';
 
 export type Film = {
   name: string;
   description: string;
-  publication: Date;
+  publication: Dayjs;
   genre: Genre;
   release: number;
   rating: number;

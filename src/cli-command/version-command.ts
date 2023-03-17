@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { CliCommandInterface } from './cli-command.interface.js';
 
 export class VersionCommand implements CliCommandInterface {
-  public readonly name = '--version';
+  public static readonly command = '--version';
 
   private readVersion(): string {
     const __filename = fileURLToPath(import.meta.url);

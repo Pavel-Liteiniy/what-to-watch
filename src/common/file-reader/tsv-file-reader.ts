@@ -1,15 +1,41 @@
-import {readFileSync} from 'fs';
+import { createReadStream } from 'fs';
+import { EventEmitter } from 'events';
 
 import { Film } from '../../types/film.type.js';
 import { FileReaderInterface } from './file-reader.interface.js';
 
-export class TSVFileReader implements FileReaderInterface {
+import { createFilm } from '../../utils/common.js';
+
+export class TSVFileReader extends EventEmitter implements FileReaderInterface {
   private rowData = '';
 
-  constructor(public filename: string) {}
+  constructor(public filename: string) {
+    super();
+  }
 
-  public read(): void {
-    this.rowData = readFileSync(this.filename, { encoding: 'utf-8' });
+  public async read():Promise<void> {
+    const stream = createReadStream(this.filename, {
+      highWaterMark: 16384, // 16KB
+      encoding: 'utf-8',
+    });
+
+    let lineRead = '';
+    let endLinePosition = -1;
+    let importedRowCount = 0;
+
+    for await (const chunk of stream) {
+      lineRead += chunk.toString();
+
+      while ((endLinePosition = lineRead.indexOf('\n')) >= 0) {
+        const completeRow = lineRead.slice(0, endLinePosition + 1);
+        lineRead = lineRead.slice(++endLinePosition);
+        importedRowCount++;
+
+        this.emit('line', completeRow);
+      }
+    }
+
+    this.emit('end', importedRowCount);
   }
 
   public getFilms(): Film[] {
@@ -18,41 +44,6 @@ export class TSVFileReader implements FileReaderInterface {
     return this.rowData
       .split('\n')
       .filter((row) => Boolean(row.trim()))
-      .map((row) => row.split('\t'))
-      .map(([
-        name,
-        description,
-        publication,
-        genre,
-        release,
-        rating,
-        previewVideo,
-        video,
-        actors,
-        director,
-        duration,
-        commentCount,
-        user,
-        poster,
-        backgroundImage,
-        backgroundColor,
-      ]) => ({
-        name,
-        description,
-        publication: new Date(publication),
-        genre,
-        release: Number(release),
-        rating: Number(rating),
-        previewVideo,
-        video,
-        actors: actors.split(','),
-        director,
-        duration: Number(duration),
-        commentCount: Number(commentCount),
-        user,
-        poster,
-        backgroundImage,
-        backgroundColor,
-      }) as Film);
+      .map((row) => createFilm(row));
   }
 }
