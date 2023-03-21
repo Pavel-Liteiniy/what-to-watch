@@ -1,4 +1,8 @@
 import dayjs from 'dayjs';
+import crypto from 'crypto';
+import { Ref } from '@typegoose/typegoose';
+
+import { UserEntity } from '../modules/user/user.entity';
 
 import { Film } from '../types/film.type';
 
@@ -24,6 +28,8 @@ export const createFilm = (row: string) => {
     .replace('\n', '')
     .split('\t');
 
+  const userId = user as unknown as Ref<UserEntity>;
+
   return ({
     name,
     description,
@@ -37,7 +43,7 @@ export const createFilm = (row: string) => {
     director,
     duration: Number(duration),
     commentCount: Number(commentCount),
-    user,
+    user: userId,
     poster,
     backgroundImage,
     backgroundColor,
@@ -46,3 +52,8 @@ export const createFilm = (row: string) => {
 
 export const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : '';
+
+export const createSHA256 = (line: string, salt: string): string => {
+  const shaHash = crypto.createHmac('sha256', salt);
+  return shaHash.update(line).digest('hex');
+};

@@ -1,9 +1,11 @@
 import dayjs from 'dayjs';
+import { Ref } from '@typegoose/typegoose';
 
 import { Film } from '../../types/film.type.js';
 import { MockData } from '../../types/mock-data.type.js';
 import { FilmGeneratorInterface } from './film-generator.interface.js';
 import { Genre } from '../../types/genre.enum.js';
+import { UserEntity } from '../../modules/user/user.entity.js';
 
 import {
   generateRandomValue,
@@ -47,7 +49,7 @@ export class FilmGenerator implements FilmGeneratorInterface {
       director: getRandomItem(directors),
       duration: generateRandomValue(60, 210),
       commentCount: generateRandomValue(0, 1000),
-      user: getRandomItem(users),
+      user: getRandomItem(users) as unknown as Ref<UserEntity>,
       poster: getRandomItem(posters),
       backgroundImage: getRandomItem(backgroundImages),
       backgroundColor: getRandomItem(backgroundColors),
@@ -71,7 +73,6 @@ export class FilmGenerator implements FilmGeneratorInterface {
       actors,
       director,
       duration,
-      commentCount,
       user,
       poster,
       backgroundImage,
@@ -90,7 +91,6 @@ export class FilmGenerator implements FilmGeneratorInterface {
       actors.join(),
       director,
       duration,
-      commentCount,
       user,
       poster,
       backgroundImage,
